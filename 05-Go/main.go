@@ -8,6 +8,16 @@ import (
 	"strconv"
 )
 
+func getMinimum(arr []int) int {
+	var minimum = arr[0]
+	for _, e := range arr {
+		if e < minimum {
+			minimum = e
+		}
+	}
+	return minimum
+}
+
 func extractNumbers(str string) []int {
 	re := regexp.MustCompile("\\d+") // creates regexp
 
@@ -22,6 +32,35 @@ func extractNumbers(str string) []int {
 	}
 
 	return numbers
+}
+
+func convert(number int, dest int, source int, len int) int {
+	if (source <= number) && (number < source+len) {
+		return dest + number - source
+	}
+	return -1
+}
+
+func getLocation(almanac []string, seed int) int {
+	almanac = almanac[3:]
+
+	var actualValue = seed
+	var canConvert = true
+
+	for _, line := range almanac {
+		var numbers = extractNumbers(line)
+		if len(numbers) == 0 {
+			canConvert = true
+			continue
+		}
+		var convertion = convert(actualValue, numbers[0], numbers[1], numbers[2])
+		if convertion != -1 && canConvert {
+			//fmt.Printf("Value %d converted to %d", actualValue, convertion)
+			canConvert = false
+			actualValue = convertion
+		}
+	}
+	return actualValue
 }
 
 func main() {
@@ -39,9 +78,13 @@ func main() {
 		lines = append(lines, line) // saves each line
 	}
 
-	for _, line := range lines {
-		fmt.Println(extractNumbers(line))
+	var seeds = extractNumbers(lines[0])
+	var locations []int
+	for _, seed := range seeds {
+		var location = getLocation(lines, seed)
+		fmt.Printf("Seed %d, location %d\n", seed, location)
+		locations = append(locations, location)
 	}
 
-	fmt.Println("Hello World!")
+	fmt.Printf("The minimum location is %d\n", getMinimum(locations))
 }
